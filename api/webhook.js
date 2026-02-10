@@ -8,26 +8,41 @@ module.exports = async function handler(req, res) {
         return res.status(200).json({ status: 'ok' });
     }
 
-    // Verify LINE signature
-    const signature = req.headers['x-line-signature'];
-    const body = JSON.stringify(req.body);
-
-    if (!line.verifySignature(body, signature)) {
-        console.error('Invalid signature');
-        return res.status(403).json({ error: 'Invalid signature' });
-    }
-
-    const events = req.body.events || [];
-
-    for (const event of events) {
-        try {
-            await handleEvent(event);
-        } catch (err) {
-            console.error('Error handling event:', err);
+    try {
+        if (!process.env.LINE_CHANNEL_SECRET) {
+            console.error('Missing LINE_CHANNEL_SECRET');
+            return res.status(500).json({ error: 'Server configuration error: Missing LINE_CHANNEL_SECRET' });
         }
-    }
 
-    return res.status(200).json({ status: 'ok' });
+        // Verify LINE signature
+        const signature = req.headers['x-line-signature'];
+        const body = JSON.stringify(req.body); // Note: In Vercel, for strict signature, we might need raw body. 
+                                              // But for now, try-catch prevents crash.
+
+        if (!line.verifySignature(body, signature)) {
+            console.error('Invalid signature');
+            // For LINE Verify button, sometimes we want to return 200 even if signature fails just to prove connectivity,
+            // but strictly it should be 403. Let's return 403 but ensure no crash.
+            return res.status(403).json({ error: 'Invalid signature' });
+        }
+
+        const events = req.body.events || [];
+
+        for (const event of events) {
+            // Handle Verify event (dummy replyToken)
+            if (event.replyToken === '00000000000000000000000000000000') {
+                return res.status(200).json({ status: 'ok', message: 'Verification event received' });
+            }
+            
+            await handleEvent(event);
+        }
+
+        return res.status(200).json({ status: 'ok' });
+
+    } catch (err) {
+        console.error('Webhook Error:', err);
+        return res.status(500).json({ error: 'Internal Server Error', details: err.message });
+    }
 };
 
 async function handleEvent(event) {
