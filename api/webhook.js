@@ -46,6 +46,12 @@ module.exports = async function handler(req, res) {
 };
 
 async function handleEvent(event) {
+    // ========== Handle Follow Event (เพิ่มเพื่อน) ==========
+    if (event.type === 'follow') {
+        await handleFollow(event.replyToken);
+        return;
+    }
+
     if (event.type !== 'message') return;
 
     const userId = event.source.userId;
@@ -220,6 +226,71 @@ async function handleCommand(parsed, replyToken) {
             }
             break;
     }
+}
+
+// ========== Handle Follow (เพิ่มเพื่อน) ==========
+async function handleFollow(replyToken) {
+    const welcomeMessage = {
+        type: 'flex',
+        altText: '🎉 ยินดีต้อนรับสู่ RenovateTrack Bot!',
+        contents: {
+            type: 'bubble',
+            size: 'mega',
+            header: {
+                type: 'box',
+                layout: 'vertical',
+                contents: [
+                    { type: 'text', text: '🏠 RenovateTrack', weight: 'bold', size: 'xl', color: '#10b981', align: 'center' },
+                    { type: 'text', text: 'ระบบบันทึกรายรับ-รายจ่าย', size: 'sm', color: '#888888', align: 'center', margin: 'sm' }
+                ],
+                backgroundColor: '#1a1a2e',
+                paddingAll: '20px'
+            },
+            body: {
+                type: 'box',
+                layout: 'vertical',
+                contents: [
+                    { type: 'text', text: '🎉 ยินดีต้อนรับ!', weight: 'bold', size: 'lg', color: '#ffffff' },
+                    { type: 'text', text: 'พิมพ์ข้อความเพื่อบันทึกรายการได้เลย', size: 'sm', color: '#aaaaaa', margin: 'md', wrap: true },
+                    { type: 'separator', margin: 'lg' },
+                    { type: 'text', text: '📝 ตัวอย่างการใช้งาน', weight: 'bold', size: 'md', color: '#f59e0b', margin: 'lg' },
+                    {
+                        type: 'box', layout: 'vertical', margin: 'md', spacing: 'md',
+                        contents: [
+                            { type: 'text', text: '💸 บันทึกรายจ่าย:', weight: 'bold', size: 'sm', color: '#ef4444' },
+                            { type: 'text', text: '• จ่าย 3500 ค่าปูน\n• ซื้อสี 1200 บ้านรามคำแหง', size: 'xs', color: '#cccccc', wrap: true },
+                            { type: 'text', text: '💰 บันทึกรายรับ:', weight: 'bold', size: 'sm', color: '#10b981', margin: 'md' },
+                            { type: 'text', text: '• รับ 50000 ค่ามัดจำ\n• รายรับ 30000 งวดที่ 2', size: 'xs', color: '#cccccc', wrap: true },
+                            { type: 'text', text: '📸 ส่งรูปบิล:', weight: 'bold', size: 'sm', color: '#3b82f6', margin: 'md' },
+                            { type: 'text', text: 'ส่งรูป → Bot ถามยอดเงิน → พิมพ์ตอบ', size: 'xs', color: '#cccccc', wrap: true }
+                        ]
+                    },
+                    { type: 'separator', margin: 'lg' },
+                    { type: 'text', text: '📋 คำสั่งอื่นๆ', weight: 'bold', size: 'sm', color: '#f59e0b', margin: 'lg' },
+                    { type: 'text', text: '• "สรุป" → ดูสรุปยอดทั้งหมด\n• "ทรัพย์สิน" → ดูรายชื่อทรัพย์\n• "ช่วยเหลือ" → ดูวิธีใช้อีกครั้ง', size: 'xs', color: '#cccccc', margin: 'sm', wrap: true }
+                ],
+                backgroundColor: '#1a1a2e',
+                paddingAll: '20px'
+            },
+            footer: {
+                type: 'box',
+                layout: 'vertical',
+                contents: [
+                    {
+                        type: 'button',
+                        action: { type: 'uri', label: '📊 เปิด Dashboard', uri: 'https://renovate-tracker.vercel.app' },
+                        style: 'primary',
+                        color: '#10b981',
+                        height: 'sm'
+                    }
+                ],
+                backgroundColor: '#1a1a2e',
+                paddingAll: '15px'
+            }
+        }
+    };
+
+    await line.reply(replyToken, welcomeMessage);
 }
 
 function getHelpMessage() {
