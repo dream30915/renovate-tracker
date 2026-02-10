@@ -1,14 +1,21 @@
 const { createClient } = require('@supabase/supabase-js');
 
-const supabase = createClient(
-    process.env.SUPABASE_URL,
-    process.env.SUPABASE_KEY
-);
+let _supabase = null;
+
+function getSupabase() {
+    if (!_supabase) {
+        if (!process.env.SUPABASE_URL || !process.env.SUPABASE_KEY) {
+            throw new Error('Missing SUPABASE_URL or SUPABASE_KEY environment variables');
+        }
+        _supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
+    }
+    return _supabase;
+}
 
 const db = {
     // ============ Properties ============
     async getProperties() {
-        const { data, error } = await supabase
+        const { data, error } = await getSupabase()
             .from('properties')
             .select('*')
             .order('created_at', { ascending: false });
@@ -17,7 +24,7 @@ const db = {
     },
 
     async getPropertyByName(name) {
-        const { data } = await supabase
+        const { data } = await getSupabase()
             .from('properties')
             .select('*')
             .ilike('name', `%${name}%`)
@@ -27,7 +34,7 @@ const db = {
     },
 
     async addProperty(name) {
-        const { data, error } = await supabase
+        const { data, error } = await getSupabase()
             .from('properties')
             .insert({ name, status: 'active' })
             .select()
@@ -38,7 +45,7 @@ const db = {
 
     // ============ Transactions ============
     async addTransaction({ property_id, type, amount, category, description, image_url, recorded_by }) {
-        const { data, error } = await supabase
+        const { data, error } = await getSupabase()
             .from('transactions')
             .insert({
                 property_id,
@@ -57,7 +64,7 @@ const db = {
     },
 
     async getTransactions(propertyId) {
-        let query = supabase
+        let query = getSupabase()
             .from('transactions')
             .select('*, properties(name)')
             .order('created_at', { ascending: false });
@@ -104,7 +111,7 @@ const db = {
 
     // ============ Pending Images ============
     async savePendingImage(userId, imageUrl) {
-        const { data, error } = await supabase
+        const { data, error } = await getSupabase()
             .from('pending_images')
             .upsert({
                 user_id: userId,
@@ -119,7 +126,7 @@ const db = {
     },
 
     async getPendingImage(userId) {
-        const { data } = await supabase
+        const { data } = await getSupabase()
             .from('pending_images')
             .select('*')
             .eq('user_id', userId)
@@ -129,7 +136,7 @@ const db = {
     },
 
     async clearPendingImage(userId) {
-        await supabase
+        await getSupabase()
             .from('pending_images')
             .delete()
             .eq('user_id', userId);
