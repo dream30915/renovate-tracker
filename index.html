@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RenovateTrack - บันทึกรายรับรายจ่าย ธุรกิจรีโนเวทบ้าน</title>
+    <meta name="description" content="ระบบจัดการธุรกิจรีโนเวทบ้าน บันทึกรายรับรายจ่าย ติดตามทรัพย์สินตั้งแต่ซื้อจนขาย">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Noto+Sans+Thai:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="login-screen" class="login-screen">
+        <div class="login-container">
+            <div class="login-logo">
+                <div class="logo-icon"><i class="fas fa-hard-hat"></i></div>
+                <h1>RenovateTrack</h1>
+                <p>ระบบจัดการธุรกิจรีโนเวทบ้าน</p>
+            </div>
+            <div class="login-form">
+                <div class="form-group">
+                    <label>เลือกผู้ใช้งาน</label>
+                    <select id="login-user-select">
+                        <option value="">-- เลือกชื่อ --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>PIN (4 หลัก)</label>
+                    <div class="pin-input-group">
+                        <input type="password" id="login-pin-1" maxlength="1" class="pin-box" inputmode="numeric">
+                        <input type="password" id="login-pin-2" maxlength="1" class="pin-box" inputmode="numeric">
+                        <input type="password" id="login-pin-3" maxlength="1" class="pin-box" inputmode="numeric">
+                        <input type="password" id="login-pin-4" maxlength="1" class="pin-box" inputmode="numeric">
+                    </div>
+                </div>
+                <button id="login-btn" class="btn btn-primary btn-full">
+                    <i class="fas fa-sign-in-alt"></i> เข้าสู่ระบบ
+                </button>
+                <div id="login-error" class="login-error"></div>
+                <button id="setup-first-user-btn" class="btn btn-ghost btn-full mt-2">
+                    <i class="fas fa-user-plus"></i> ตั้งค่าผู้ใช้คนแรก
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Setup First User Modal -->
+    <div id="setup-modal" class="modal-overlay" style="display:none">
+        <div class="modal">
+            <div class="modal-header">
+                <h2><i class="fas fa-user-cog"></i> ตั้งค่าเจ้าของธุรกิจ</h2>
+                <button class="modal-close" onclick="document.getElementById('setup-modal').style.display='none'">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>ชื่อ</label>
+                    <input type="text" id="setup-name" placeholder="ชื่อเจ้าของธุรกิจ">
+                </div>
+                <div class="form-group">
+                    <label>PIN (4 หลัก)</label>
+                    <input type="password" id="setup-pin" maxlength="4" placeholder="ตั้ง PIN 4 หลัก" inputmode="numeric">
+                </div>
+                <div class="form-group">
+                    <label>ยืนยัน PIN</label>
+                    <input type="password" id="setup-pin-confirm" maxlength="4" placeholder="ยืนยัน PIN" inputmode="numeric">
+                </div>
+                <button id="setup-save-btn" class="btn btn-primary btn-full">
+                    <i class="fas fa-check"></i> สร้างบัญชีเจ้าของ
+                </button>
+                <div id="setup-error" class="login-error"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="app" class="app-container" style="display:none">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <div class="logo-icon-sm"><i class="fas fa-hard-hat"></i></div>
+                    <span class="logo-text">RenovateTrack</span>
+                </div>
+                <button id="sidebar-close" class="sidebar-close"><i class="fas fa-times"></i></button>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-link active" data-page="dashboard">
+                    <i class="fas fa-chart-pie"></i><span>Dashboard</span>
+                </a>
+                <a href="#" class="nav-link" data-page="properties">
+                    <i class="fas fa-home"></i><span>ทรัพย์สิน</span>
+                </a>
+                <a href="#" class="nav-link" data-page="transactions">
+                    <i class="fas fa-exchange-alt"></i><span>รายรับ-รายจ่าย</span>
+                </a>
+                <a href="#" class="nav-link" data-page="workflow">
+                    <i class="fas fa-tasks"></i><span>ขั้นตอนการทำงาน</span>
+                </a>
+                <a href="#" class="nav-link" data-page="reports">
+                    <i class="fas fa-file-chart-line"></i><span>รายงาน</span>
+                </a>
+                <a href="#" class="nav-link" data-page="team">
+                    <i class="fas fa-users"></i><span>ทีมงาน</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="user-avatar" id="sidebar-avatar">👤</div>
+                    <div class="user-details">
+                        <span class="user-name" id="sidebar-username">ผู้ใช้</span>
+                        <span class="user-role" id="sidebar-role">เจ้าของ</span>
+                    </div>
+                </div>
+                <button id="logout-btn" class="btn btn-ghost btn-sm">
+                    <i class="fas fa-sign-out-alt"></i> ออก
+                </button>
+                <div class="data-actions">
+                    <button id="export-btn" class="btn btn-ghost btn-xs" title="Export ข้อมูล">
+                        <i class="fas fa-download"></i>
+                    </button>
+                    <button id="import-btn" class="btn btn-ghost btn-xs" title="Import ข้อมูล">
+                        <i class="fas fa-upload"></i>
+                    </button>
+                    <input type="file" id="import-file" accept=".json" style="display:none">
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-bar">
+                <button id="menu-toggle" class="menu-toggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h2 id="page-title" class="page-title">Dashboard</h2>
+                <div class="top-bar-actions">
+                    <button id="quick-add-btn" class="btn btn-primary btn-sm">
+                        <i class="fas fa-plus"></i> <span class="hide-mobile">เพิ่มรายการ</span>
+                    </button>
+                </div>
+            </header>
+
+            <div class="content-area">
+                <!-- Dashboard Page -->
+                <section id="page-dashboard" class="page active">
+                    <div class="dashboard-stats">
+                        <div class="stat-card stat-total">
+                            <div class="stat-icon"><i class="fas fa-home"></i></div>
+                            <div class="stat-info">
+                                <span class="stat-value" id="stat-total-properties">0</span>
+                                <span class="stat-label">ทรัพย์สินทั้งหมด</span>
+                            </div>
+                        </div>
+                        <div class="stat-card stat-active">
+                            <div class="stat-icon"><i class="fas fa-hammer"></i></div>
+                            <div class="stat-info">
+                                <span class="stat-value" id="stat-active-properties">0</span>
+                                <span class="stat-label">กำลังดำเนินการ</span>
+                            </div>
+                        </div>
+                        <div class="stat-card stat-income">
+                            <div class="stat-icon"><i class="fas fa-arrow-up"></i></div>
+                            <div class="stat-info">
+                                <span class="stat-value" id="stat-total-income">฿0</span>
+                                <span class="stat-label">รายรับรวม</span>
+                            </div>
+                        </div>
+                        <div class="stat-card stat-expense">
+                            <div class="stat-icon"><i class="fas fa-arrow-down"></i></div>
+                            <div class="stat-info">
+                                <span class="stat-value" id="stat-total-expense">฿0</span>
+                                <span class="stat-label">รายจ่ายรวม</span>
+                            </div>
+                        </div>
+                        <div class="stat-card stat-profit">
+                            <div class="stat-icon"><i class="fas fa-chart-line"></i></div>
+                            <div class="stat-info">
+                                <span class="stat-value" id="stat-total-profit">฿0</span>
+                                <span class="stat-label">กำไร/ขาดทุน</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="dashboard-grid">
+                        <div class="card chart-card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-chart-bar"></i> สรุปรายรับ-รายจ่าย</h3>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="chart-income-expense"></canvas>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-clock"></i> ทรัพย์สินล่าสุด</h3>
+                            </div>
+                            <div class="card-body" id="recent-properties">
+                                <div class="empty-state">
+                                    <i class="fas fa-home"></i>
+                                    <p>ยังไม่มีทรัพย์สิน</p>
+                                    <button class="btn btn-primary btn-sm" onclick="navigateTo('properties')">เพิ่มทรัพย์สิน</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-list"></i> รายการล่าสุด</h3>
+                            </div>
+                            <div class="card-body" id="recent-transactions">
+                                <div class="empty-state">
+                                    <i class="fas fa-receipt"></i>
+                                    <p>ยังไม่มีรายการ</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Properties Page -->
+                <section id="page-properties" class="page"></section>
+
+                <!-- Transactions Page -->
+                <section id="page-transactions" class="page"></section>
+
+                <!-- Workflow Page -->
+                <section id="page-workflow" class="page"></section>
+
+                <!-- Reports Page -->
+                <section id="page-reports" class="page"></section>
+
+                <!-- Team Page -->
+                <section id="page-team" class="page"></section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Quick Add Modal -->
+    <div id="quick-add-modal" class="modal-overlay" style="display:none">
+        <div class="modal modal-lg">
+            <div class="modal-header">
+                <h2 id="quick-add-title"><i class="fas fa-plus-circle"></i> เพิ่มรายการ</h2>
+                <button class="modal-close" id="quick-add-close">&times;</button>
+            </div>
+            <div class="modal-body" id="quick-add-body"></div>
+        </div>
+    </div>
+
+    <!-- Generic Confirm Modal -->
+    <div id="confirm-modal" class="modal-overlay" style="display:none">
+        <div class="modal modal-sm">
+            <div class="modal-header">
+                <h2 id="confirm-title">ยืนยัน</h2>
+            </div>
+            <div class="modal-body">
+                <p id="confirm-message">คุณแน่ใจหรือไม่?</p>
+                <div class="modal-actions">
+                    <button id="confirm-cancel" class="btn btn-ghost">ยกเลิก</button>
+                    <button id="confirm-ok" class="btn btn-danger">ยืนยัน</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="app.js"></script>
+    <script src="modules/dashboard.js"></script>
+    <script src="modules/properties.js"></script>
+    <script src="modules/transactions.js"></script>
+    <script src="modules/workflow.js"></script>
+    <script src="modules/reports.js"></script>
+    <script src="modules/team.js"></script>
+</body>
+</html>

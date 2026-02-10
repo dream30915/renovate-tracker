@@ -1,0 +1,13 @@
+{
+  "name": "renovate-track",
+  "version": "1.0.0",
+  "description": "LINE Bot + Web Dashboard สำหรับบันทึกรายรับรายจ่ายธุรกิจรีโนเวทบ้าน",
+  "scripts": {
+    "dev": "vercel dev",
+    "deploy": "vercel --prod"
+  },
+  "dependencies": {
+    "@line/bot-sdk": "^9.6.0",
+    "@supabase/supabase-js": "^2.47.0"
+  }
+}
